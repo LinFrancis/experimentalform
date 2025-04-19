@@ -3,29 +3,28 @@ from oauth2client.service_account import ServiceAccountCredentials
 import streamlit as st
 import pandas as pd
 from datetime import datetime
-import json
 
-# Authenticate and connect to Google Sheets
-def connect_to_gsheet(creds_json,spreadsheet_name,sheet_name):
-    scope = ["https://spreadsheets.google.com/feeds", 'https://www.googleapis.com/auth/spreadsheets',
-             "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
+# 🔐 Load credentials from st.secrets, NOT from a file
+def connect_to_gsheet(spreadsheet_name, sheet_name):
+    scope = [
+        "https://spreadsheets.google.com/feeds",
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive.file",
+        "https://www.googleapis.com/auth/drive"
+    ]
     
-    
-    creds_dict = st.secrets["gsheets"]
-    credentials = ServiceAccountCredentials.from_json_keyfile_dict(dict(creds_dict), scope)
+    creds_dict = dict(st.secrets["gsheets"])
+    credentials = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
     client = gspread.authorize(credentials)
-    spreadsheet = client.open(spreadsheet_name)  # Access the first sheet
+    spreadsheet = client.open(spreadsheet_name)
     return spreadsheet.worksheet(sheet_name)
 
-# Google Sheet credentials file
-SPREADSHEET_NAME = 'testconnection'
-SHEET_NAME = 'Tasks'
-CREDENTIALS_FILE = './credentials.json'
+# ✅ No credentials file needed — remove this!
+SPREADSHEET_NAME = "Streamlit"
+SHEET_NAME = "Tasks"
 
-# Connect to the Google Sheet
-sheet_by_name = connect_to_gsheet(CREDENTIALS_FILE, SPREADSHEET_NAME, sheet_name=SHEET_NAME)
-
-st.title("Tasks Form")
+# ✅ Now connect to the sheet using secrets
+sheet_by_name = connect_to_gsheet(SPREADSHEET_NAME, SHEET_NAME)
 
 # Form schema definition
 form_schema = {
