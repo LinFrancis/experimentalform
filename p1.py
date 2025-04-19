@@ -3,13 +3,16 @@ from oauth2client.service_account import ServiceAccountCredentials
 import streamlit as st
 import pandas as pd
 from datetime import datetime
+import json
 
 # Authenticate and connect to Google Sheets
 def connect_to_gsheet(creds_json,spreadsheet_name,sheet_name):
     scope = ["https://spreadsheets.google.com/feeds", 'https://www.googleapis.com/auth/spreadsheets',
              "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
     
-    credentials = ServiceAccountCredentials.from_json_keyfile_name(creds_json, scope)
+    
+    creds_dict = st.secrets["gsheets"]
+    credentials = ServiceAccountCredentials.from_json_keyfile_dict(dict(creds_dict), scope)
     client = gspread.authorize(credentials)
     spreadsheet = client.open(spreadsheet_name)  # Access the first sheet
     return spreadsheet.worksheet(sheet_name)
